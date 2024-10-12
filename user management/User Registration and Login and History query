@@ -1,1 +1,147 @@
+import java.util.ArrayList;
+import java.util.List;
 
+public class User {
+    private String username;
+    private String password;
+    private String defaultLicensePlate;
+    private List<ParkingRecord> parkingHistory;
+
+    public User(String username, String password, String defaultLicensePlate) {
+        this.username = username;
+        this.password = password;
+        this.defaultLicensePlate = defaultLicensePlate;
+        this.parkingHistory = new ArrayList<>();
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public boolean checkPassword(String password) {
+        return this.password.equals(password);
+    }
+
+    public String getDefaultLicensePlate() {
+        return defaultLicensePlate;
+    }
+
+    public List<ParkingRecord> getParkingHistory() {
+        return parkingHistory;
+    }
+
+    public void addParkingRecord(ParkingRecord record) {
+        parkingHistory.add(record);
+    }
+}
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+public class ParkingRecord {
+    private String licensePlate;
+    private Date entryTime;
+    private Date exitTime;
+    private double fee;
+
+    public ParkingRecord(String licensePlate, Date entryTime, Date exitTime, double fee) {
+        this.licensePlate = licensePlate;
+        this.entryTime = entryTime;
+        this.exitTime = exitTime;
+        this.fee = fee;
+    }
+
+    public String getLicensePlate() {
+        return licensePlate;
+    }
+
+    public Date getEntryTime() {
+        return entryTime;
+    }
+
+    public Date getExitTime() {
+        return exitTime;
+    }
+
+    public double getFee() {
+        return fee;
+    }
+
+    public String getFormattedEntryTime() {
+        return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(entryTime);
+    }
+
+    public String getFormattedExitTime() {
+        return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(exitTime);
+    }
+
+    @Override
+    public String toString() {
+        return "车牌号: " + licensePlate + ", 进入时间: " + getFormattedEntryTime() + ", 离开时间: " + getFormattedExitTime() + ", 费用: " + fee + "元";
+    }
+}
+import java.util.HashMap;
+import java.util.Map;
+
+public class UserManager {
+    private Map<String, User> users = new HashMap<>();
+
+    // 注册用户
+    public boolean registerUser(String username, String password, String licensePlate) {
+        if (users.containsKey(username)) {
+            return false; // 用户名已存在
+        }
+        users.put(username, new User(username, password, licensePlate));
+        return true;
+    }
+
+    // 用户登录
+    public User loginUser(String username, String password) {
+        User user = users.get(username);
+        if (user != null && user.checkPassword(password)) {
+            return user;
+        }
+        return null; // 登录失败
+    }
+}
+import java.util.Date;
+
+public class Main {
+    public static void main(String[] args) {
+        UserManager userManager = new UserManager();
+
+        // 注册新用户
+        boolean isRegistered = userManager.registerUser("user1", "password123", "ABC123");
+        if (isRegistered) {
+            System.out.println("注册成功！");
+        } else {
+            System.out.println("用户名已存在！");
+        }
+
+        // 用户登录
+        User user = userManager.loginUser("user1", "password123");
+        if (user != null) {
+            System.out.println("登录成功，欢迎 " + user.getUsername() + "！");
+        } else {
+            System.out.println("登录失败，用户名或密码错误！");
+            return;
+        }
+
+        // 模拟添加停车记录
+        Date entryTime = new Date();
+        try {
+            Thread.sleep(2000); // 模拟停车时间
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        Date exitTime = new Date();
+        double fee = 20.0;
+        ParkingRecord record = new ParkingRecord(user.getDefaultLicensePlate(), entryTime, exitTime, fee);
+        user.addParkingRecord(record);
+
+        // 查看历史停车记录
+        System.out.println("历史停车记录：");
+        for (ParkingRecord parkingRecord : user.getParkingHistory()) {
+            System.out.println(parkingRecord);
+        }
+    }
+}

@@ -1,0 +1,82 @@
+CREATE TABLE ParkingSlot (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    status ENUM('Available', 'Occupied') NOT NULL,
+    reserved BOOLEAN DEFAULT FALSE
+);
+public class ParkingSlot {
+    private int id;
+    private String status;
+    private boolean reserved;
+
+    public ParkingSlot(int id, String status, boolean reserved) {
+        this.id = id;
+        this.status = status;
+        this.reserved = reserved;
+    }
+
+    // Getters and Setters
+    public int getId() { return id; }
+    public String getStatus() { return status; }
+    public boolean isReserved() { return reserved; }
+}
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+
+public class ParkingLotService {
+    private static final String DB_URL = "jdbc:mysql://localhost:3306/parking";
+    private static final String USER = "root";
+    private static final String PASS = "password";
+
+    // 查询所有车位状态
+    public List<ParkingSlot> getParkingSlots() {
+        List<ParkingSlot> slots = new ArrayList<>();
+        String query = "SELECT id, status, reserved FROM ParkingSlot";
+
+        try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS);
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(query)) {
+            
+            while (rs.next()) {
+                slots.add(new ParkingSlot(rs.getInt("id"), rs.getString("status"), rs.getBoolean("reserved")));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return slots;
+    }
+
+    // 预定车位
+    public boolean reserveSlot(int slotId) {
+        String update = "UPDATE ParkingSlot SET reserved = TRUE WHERE id = ? AND status = 'Available'";
+        
+        try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS);
+             PreparedStatement pstmt = conn.prepareStatement(update)) {
+             
+            pstmt.setInt(1, slotId);
+            return pstmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+}
+public class Main {
+    public static void main(String[] args) {
+        ParkingLotService service = new ParkingLotService();
+        
+        // 显示所有车位状态
+        List<ParkingSlot> slots = service.getParkingSlots();
+        for (ParkingSlot slot : slots) {
+            System.out.println("车位ID: " + slot.getId() + ", 状态: " + slot.getStatus() + ", 是否预定: " + slot.isReserved());
+        }
+
+        // 预定车位示例
+        int slotIdToReserve = 1; // 假设预定ID为1的车位
+        if (service.reserveSlot(slotIdToReserve)) {
+            System.out.println("车位 " + slotIdToReserve + " 预定成功。");
+        } else {
+            System.out.println("车位 " + slotIdToReserve + " 预定失败。");
+        }
+    }
+}

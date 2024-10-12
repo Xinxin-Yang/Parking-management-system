@@ -1,1 +1,72 @@
+public class Vehicle {
+    private String licensePlate;
+    private long entryTime;
 
+    public Vehicle(String licensePlate, long entryTime) {
+        this.licensePlate = licensePlate;
+        this.entryTime = entryTime;
+    }
+
+    public String getLicensePlate() {
+        return licensePlate;
+    }
+
+    public long getEntryTime() {
+        return entryTime;
+    }
+
+
+public class ParkingFeeCalculator {
+    private static final double HOURLY_RATE = 10.0;
+
+    public static double calculateFee(long hours) {
+        return hours * HOURLY_RATE;
+    }
+}
+public interface PaymentMethod {
+    void pay(double amount);
+}
+public class CreditCardPayment implements PaymentMethod {
+    @Override
+    public void pay(double amount) {
+        System.out.println("使用信用卡支付: " + amount + "元");
+    }
+}
+public class WeChatPayment implements PaymentMethod {
+    @Override
+    public void pay(double amount) {
+        System.out.println("使用微信支付: " + amount + "元");
+    }
+}
+public class CashPayment implements PaymentMethod {
+    @Override
+    public void pay(double amount) {
+        System.out.println("使用现金支付: " + amount + "元");
+    }
+}
+import java.util.HashMap;
+import java.util.Map;
+
+public class ParkingSystem {
+    private Map<String, Vehicle> vehicles = new HashMap<>();
+
+    public void vehicleEntry(String licensePlate) {
+        Vehicle vehicle = new Vehicle(licensePlate, System.currentTimeMillis());
+        vehicles.put(licensePlate, vehicle);
+        System.out.println("车辆 " + licensePlate + " 已进入。");
+    }
+
+    public void vehicleExit(String licensePlate, PaymentMethod paymentMethod) {
+        Vehicle vehicle = vehicles.get(licensePlate);
+        if (vehicle != null) {
+            long exitTime = System.currentTimeMillis();
+            long hours = vehicle.getParkingDuration(exitTime);
+            double fee = ParkingFeeCalculator.calculateFee(hours);
+            System.out.println("车辆 " + licensePlate + " 停车费用: " + fee + "元");
+            paymentMethod.pay(fee);
+            vehicles.remove(licensePlate);
+        } else {
+            System.out.println("未找到该车辆的信息！");
+        }
+    }
+}

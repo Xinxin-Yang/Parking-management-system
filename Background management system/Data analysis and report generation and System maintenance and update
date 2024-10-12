@@ -1,1 +1,70 @@
+import java.util.ArrayList;
+import java.util.List;
 
+public class ParkingLot {
+    private int totalSpaces; // 总车位数
+    private List<ParkingRecord> records; // 停车记录
+
+    public ParkingLot(int totalSpaces) {
+        this.totalSpaces = totalSpaces;
+        this.records = new ArrayList<>();
+    }
+
+    public int getTotalSpaces() {
+        return totalSpaces;
+    }
+
+    public void addParkingRecord(ParkingRecord record) {
+        records.add(record);
+    }
+
+    // 统计车位使用率
+    public double getUsageRate() {
+        return (double) records.size() / totalSpaces * 100;
+    }
+
+    // 计算总收入
+    public double getTotalIncome() {
+        double totalIncome = 0.0;
+        for (ParkingRecord record : records) {
+            totalIncome += record.getFee();
+        }
+        return totalIncome;
+    }
+
+    // 统计平均停车时长
+    public double getAverageParkingDuration() {
+        long totalDuration = 0;
+        for (ParkingRecord record : records) {
+            totalDuration += (record.getExitTime().getTime() - record.getEntryTime().getTime()) / (1000 * 60 * 60); // 转为小时
+        }
+        return records.isEmpty() ? 0 : (double) totalDuration / records.size();
+    }
+
+    public List<ParkingRecord> getRecords() {
+        return records;
+    }
+}
+public class ReportGenerator {
+    public static void generateReport(ParkingLot parkingLot) {
+        System.out.println("停车场运营报表");
+        System.out.println("---------------------");
+        System.out.printf("总车位数: %d\n", parkingLot.getTotalSpaces());
+        System.out.printf("使用率: %.2f%%\n", parkingLot.getUsageRate());
+        System.out.printf("总收入: %.2f元\n", parkingLot.getTotalIncome());
+        System.out.printf("平均停车时长: %.2f小时\n", parkingLot.getAverageParkingDuration());
+        System.out.println("---------------------");
+    }
+}
+public class SystemMaintenance {
+    public static void checkSystemStatus() {
+        // 模拟系统状态检查
+        System.out.println("系统状态检查：一切正常。");
+    }
+
+    public static void updateSoftware() {
+        // 模拟软件更新
+        System.out.println("正在更新软件，请稍候...");
+        System.out.println("软件更新完成。");
+    }
+}

@@ -1,1 +1,80 @@
+import java.util.Random;
 
+public class Camera {
+    private String location;
+    private Random random = new Random();
+
+    public Camera(String location) {
+        this.location = location;
+    }
+
+    // 模拟检测车辆
+    public String detectVehicle() {
+        if (random.nextBoolean()) {
+            return "检测到车辆在 " + location;
+        }
+        return null;
+    }
+
+    // 模拟检测人员
+    public String detectPerson() {
+        if (random.nextBoolean()) {
+            return "检测到人员在 " + location;
+        }
+        return null;
+    }
+}
+import java.util.ArrayList;
+import java.util.List;
+
+public class MonitoringSystem {
+    private List<Camera> cameras = new ArrayList<>();
+
+    public void addCamera(Camera camera) {
+        cameras.add(camera);
+    }
+
+    // 开始实时监控
+    public void startMonitoring() {
+        for (Camera camera : cameras) {
+            new Thread(() -> {
+                while (true) {
+                    monitor(camera);
+                    try {
+                        Thread.sleep(2000); // 每隔2秒更新一次
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }).start();
+        }
+    }
+
+    // 执行监控操作
+    private void monitor(Camera camera) {
+        String vehicleDetection = camera.detectVehicle();
+        String personDetection = camera.detectPerson();
+
+        if (vehicleDetection != null) {
+            System.out.println(vehicleDetection);
+        }
+
+        if (personDetection != null) {
+            System.out.println(personDetection);
+        }
+    }
+}
+public class Main {
+    public static void main(String[] args) {
+        MonitoringSystem monitoringSystem = new MonitoringSystem();
+
+        // 在不同位置安装摄像头
+        monitoringSystem.addCamera(new Camera("入口"));
+        monitoringSystem.addCamera(new Camera("停车区A"));
+        monitoringSystem.addCamera(new Camera("停车区B"));
+        monitoringSystem.addCamera(new Camera("出口"));
+
+        // 启动实时监控
+        monitoringSystem.startMonitoring();
+    }
+}
